@@ -1,1 +1,3 @@
 rootProject.name = 'e-commerce-batch'
+include 'batch'
+
