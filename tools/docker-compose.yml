@@ -10,3 +10,30 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=local
     restart: always
+  prometheus:
+    image: prom/prometheus:v2.7.2
+    container_name: ecb-prometheus
+    restart: always
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/data:/prometheus
+    ports:
+      - '19090:9090'
+  pushgateway:
+    image: prom/pushgateway:v0.6.0
+    container_name: ecb-pushgateway
+    restart: always
+    ports:
+      - '19091:9091'
+  grafana:
+    image: grafana/grafana:6.0.2
+    container_name: ecb-grafana
+    restart: always
+    ports:
+      - '13000:3000'
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
