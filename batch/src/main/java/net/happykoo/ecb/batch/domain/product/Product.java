@@ -1,10 +1,14 @@
 package net.happykoo.ecb.batch.domain.product;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.happykoo.ecb.batch.dto.ProductUploadCsvRow;
+import net.happykoo.ecb.batch.util.DateTimeUtils;
+import net.happykoo.ecb.batch.util.RandomUtils;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -16,8 +20,8 @@ public class Product {
 
   private String category;
   private String productName;
-  private LocalDateTime salesStartDate; //판매 시작일
-  private LocalDateTime salesEndDate; //판매 종료일
+  private LocalDate salesStartDate; //판매 시작일
+  private LocalDate salesEndDate; //판매 종료일
   private ProductStatus productStatus;
   private String brand; //브랜드
   private String manufacturer; //제조사
@@ -27,4 +31,22 @@ public class Product {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
+  public static Product from(ProductUploadCsvRow row) {
+    LocalDateTime now = LocalDateTime.now();
+    return new Product(
+        RandomUtils.getRandomId(),
+        row.getSellerId(),
+        row.getCategory(),
+        row.getProductName(),
+        DateTimeUtils.toLocalDate(row.getSalesStartDate()),
+        DateTimeUtils.toLocalDate(row.getSalesStartDate()),
+        ProductStatus.valueOf(row.getProductStatus()),
+        row.getBrand(),
+        row.getManufacturer(),
+        row.getSalesPrice(),
+        row.getStockQuantity(),
+        now,
+        now
+    );
+  }
 }

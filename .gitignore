@@ -25,4 +25,5 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-tools/postgres
+tools/postgres/data/*
+!tools/postgres/data/postgresql.conf
