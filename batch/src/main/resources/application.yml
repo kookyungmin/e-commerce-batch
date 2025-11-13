@@ -2,11 +2,11 @@ spring:
   application:
     name: e-commerce-batch
   datasource:
-    url: jdbc:postgresql://localhost:15432/ecb?profileSQL=true
+    url: jdbc:postgresql://localhost:15432/ecb?profileSQL=true&reWriteBatchedInserts=true
     username: postgres
     password:
     hikari:
-      maximum-pool-size: 200
+      maximum-pool-size: 32
   batch:
     jdbc:
       initialize-schema: always

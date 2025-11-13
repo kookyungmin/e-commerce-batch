@@ -1,4 +1,4 @@
-package net.happykoo.ecb.batch.jobconfig.product.upload;
+package net.happykoo.ecb.batch.job.product.upload;
 
 import java.sql.Timestamp;
 import javax.sql.DataSource;
@@ -20,10 +20,13 @@ import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.support.SynchronizedItemStreamReader;
+import org.springframework.batch.item.support.builder.SynchronizedItemStreamReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -45,28 +48,35 @@ public class ProductUploadJobConfiguration {
       StepExecutionListener stepExecutionListener,
       ItemReader<ProductUploadCsvRow> productReader,
       ItemProcessor<ProductUploadCsvRow, Product> productProcessor,
-      ItemWriter<Product> productwriter) {
+      ItemWriter<Product> productWriter,
+      TaskExecutor taskExecutor) {
     return new StepBuilder("productUploadStep", jobRepository)
-        .<ProductUploadCsvRow, Product>chunk(1000, transactionManager)
+        .<ProductUploadCsvRow, Product>chunk(5000, transactionManager)
         .reader(productReader)
         .processor(productProcessor)
-        .writer(productwriter)
+        .writer(productWriter)
         .allowStartIfComplete(true) //완료되어도 재실행 가능(개발단계에서만 true)
         .listener(stepExecutionListener)
+        .taskExecutor(taskExecutor) //멀티 쓰레드 병렬 처리
         .build();
   }
 
   @Bean
   @StepScope
-  public FlatFileItemReader<ProductUploadCsvRow> productReader(
+  public SynchronizedItemStreamReader<ProductUploadCsvRow> productReader(
       @Value("#{jobParameters['inputFilePath']}") String path) {
-    return new FlatFileItemReaderBuilder<ProductUploadCsvRow>()
+    FlatFileItemReader fileItemReader = new FlatFileItemReaderBuilder<ProductUploadCsvRow>()
         .name("productReader")
         .resource(new FileSystemResource(path))
         .delimited() //default 콤마(,)
         .names(ReflectionUtils.getFieldName(ProductUploadCsvRow.class).toArray(String[]::new))
         .targetType(ProductUploadCsvRow.class)
         .linesToSkip(1) //헤더는 제외
+        .build();
+
+    //Thread safe 하게 설정
+    return new SynchronizedItemStreamReaderBuilder<ProductUploadCsvRow>()
+        .delegate(fileItemReader)
         .build();
   }
 

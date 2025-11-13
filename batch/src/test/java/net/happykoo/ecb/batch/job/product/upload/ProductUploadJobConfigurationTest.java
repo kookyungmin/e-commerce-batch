@@ -1,4 +1,4 @@
-package net.happykoo.ecb.batch.jobconfig.product.upload;
+package net.happykoo.ecb.batch.job.product.upload;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
