@@ -26,8 +26,6 @@ import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
-import org.springframework.batch.item.support.SynchronizedItemStreamReader;
-import org.springframework.batch.item.support.builder.SynchronizedItemStreamReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -98,13 +96,14 @@ public class ProductUploadJobConfiguration {
         .writer(productWriter)
         .allowStartIfComplete(true) //완료되어도 재실행 가능(개발단계에서만 true)
         .listener(stepExecutionListener)
-        .taskExecutor(taskExecutor) //멀티 쓰레드 병렬 처리
+//        .taskExecutor(taskExecutor) //멀티 쓰레드 병렬 처리
         .build();
   }
 
   @Bean
   @StepScope
-  public SynchronizedItemStreamReader<ProductUploadCsvRow> productReader(
+//  public SynchronizedItemStreamReader<ProductUploadCsvRow> productReader(
+  public FlatFileItemReader<ProductUploadCsvRow> productReader(
       @Value("#{stepExecutionContext['file']}") File file) {
     FlatFileItemReader fileItemReader = new FlatFileItemReaderBuilder<ProductUploadCsvRow>()
         .name("productReader")
@@ -116,9 +115,10 @@ public class ProductUploadJobConfiguration {
         .build();
 
     //Thread safe 하게 설정
-    return new SynchronizedItemStreamReaderBuilder<ProductUploadCsvRow>()
-        .delegate(fileItemReader)
-        .build();
+//    return new SynchronizedItemStreamReaderBuilder<ProductUploadCsvRow>()
+//        .delegate(fileItemReader)
+//        .build();
+    return fileItemReader;
   }
 
   @Bean
