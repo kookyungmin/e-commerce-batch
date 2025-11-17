@@ -1,16 +1,22 @@
 package net.happykoo.ecb.batch.job.product.upload;
 
+import java.io.File;
 import java.sql.Timestamp;
 import javax.sql.DataSource;
 import net.happykoo.ecb.batch.domain.product.Product;
 import net.happykoo.ecb.batch.dto.ProductUploadCsvRow;
+import net.happykoo.ecb.batch.service.file.SplitFilePartitioner;
+import net.happykoo.ecb.batch.util.FileUtils;
 import net.happykoo.ecb.batch.util.ReflectionUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.partition.PartitionHandler;
+import org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -34,12 +40,46 @@ public class ProductUploadJobConfiguration {
 
   @Bean
   public Job productUploadJob(JobRepository jobRepository,
-      Step productUploadStep,
+      Step productUploadPartitionStep,
       JobExecutionListener jobExecutionListener) {
+
     return new JobBuilder("productUploadJob", jobRepository)
         .listener(jobExecutionListener)
-        .start(productUploadStep)
+        .start(productUploadPartitionStep)
         .build();
+  }
+
+  @Bean
+  public Step productUploadPartitionStep(JobRepository jobRepository,
+      Step productUploadStep,
+      PartitionHandler filePartitionHandler,
+      SplitFilePartitioner splitFilePartitioner) {
+
+    return new StepBuilder("productUploadPartitionStep", jobRepository)
+        .partitioner(productUploadStep.getName(), splitFilePartitioner)
+        .partitionHandler(filePartitionHandler)
+        .allowStartIfComplete(true)
+        .build();
+  }
+
+  @Bean
+  @JobScope
+  public SplitFilePartitioner splitFilePartitioner(
+      @Value("#{jobParameters['inputFilePath']}") String path,
+      @Value("#{jobParameters['gridSize']}") int gridSize) {
+    return new SplitFilePartitioner(FileUtils.splitCsv(new File(path), gridSize));
+  }
+
+  @Bean
+  @JobScope
+  public TaskExecutorPartitionHandler filePartitionHandler(TaskExecutor taskExecutor,
+      Step productUploadStep) {
+    TaskExecutorPartitionHandler handler = new TaskExecutorPartitionHandler();
+
+    handler.setTaskExecutor(taskExecutor);
+    handler.setStep(productUploadStep);
+
+    return handler;
   }
 
   @Bean
@@ -50,6 +90,7 @@ public class ProductUploadJobConfiguration {
       ItemProcessor<ProductUploadCsvRow, Product> productProcessor,
       ItemWriter<Product> productWriter,
       TaskExecutor taskExecutor) {
+
     return new StepBuilder("productUploadStep", jobRepository)
         .<ProductUploadCsvRow, Product>chunk(5000, transactionManager)
         .reader(productReader)
@@ -64,14 +105,14 @@ public class ProductUploadJobConfiguration {
   @Bean
   @StepScope
   public SynchronizedItemStreamReader<ProductUploadCsvRow> productReader(
-      @Value("#{jobParameters['inputFilePath']}") String path) {
+      @Value("#{stepExecutionContext['file']}") File file) {
     FlatFileItemReader fileItemReader = new FlatFileItemReaderBuilder<ProductUploadCsvRow>()
         .name("productReader")
-        .resource(new FileSystemResource(path))
+        .resource(new FileSystemResource(file))
         .delimited() //default 콤마(,)
         .names(ReflectionUtils.getFieldName(ProductUploadCsvRow.class).toArray(String[]::new))
         .targetType(ProductUploadCsvRow.class)
-        .linesToSkip(1) //헤더는 제외
+//        .linesToSkip(1) //헤더는 제외할 때 사용 -> 파티셔닝에서 헤더 제외시킴
         .build();
 
     //Thread safe 하게 설정
