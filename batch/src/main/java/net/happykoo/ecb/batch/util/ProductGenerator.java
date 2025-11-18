@@ -24,7 +24,7 @@ public class ProductGenerator {
     try (FileWriter fileWriter = new FileWriter(csvFilePath);
         CSVPrinter printer = new CSVPrinter(fileWriter, CSVFormat.DEFAULT.builder()
             .setHeader(
-                ReflectionUtils.getFieldName(ProductUploadCsvRow.class).toArray(String[]::new))
+                ReflectionUtils.getFieldNames(ProductUploadCsvRow.class).toArray(String[]::new))
             .build())) {
       for (int i = 0; i < recordCount; i++) {
         printer.printRecord(generateProductCsvRowRecord());

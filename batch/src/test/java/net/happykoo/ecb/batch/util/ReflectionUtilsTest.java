@@ -16,7 +16,7 @@ class ReflectionUtilsTest {
 
   @Test
   void testGetFieldNames() {
-    List<String> fieldNames = ReflectionUtils.getFieldName(TestClass.class);
+    List<String> fieldNames = ReflectionUtils.getFieldNames(TestClass.class);
 
     assertThat(fieldNames).hasSize(2)
         .containsExactly("field1", "field2")

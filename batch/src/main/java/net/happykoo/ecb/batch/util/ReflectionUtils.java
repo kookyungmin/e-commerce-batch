@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ReflectionUtils {
 
-  public static List<String> getFieldName(Class<?> clazz) {
+  public static List<String> getFieldNames(Class<?> clazz) {
     List<String> fieldNames = new ArrayList<>();
     Field[] fields = clazz.getDeclaredFields();
 

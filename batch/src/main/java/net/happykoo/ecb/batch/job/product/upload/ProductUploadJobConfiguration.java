@@ -110,7 +110,7 @@ public class ProductUploadJobConfiguration {
         .name("productReader")
         .resource(new FileSystemResource(filePath))
         .delimited() //default 콤마(,)
-        .names(ReflectionUtils.getFieldName(ProductUploadCsvRow.class).toArray(String[]::new))
+        .names(ReflectionUtils.getFieldNames(ProductUploadCsvRow.class).toArray(String[]::new))
         .targetType(ProductUploadCsvRow.class)
 //        .linesToSkip(1) //헤더는 제외할 때 사용 -> 파티셔닝에서 헤더 제외시킴
         .build();

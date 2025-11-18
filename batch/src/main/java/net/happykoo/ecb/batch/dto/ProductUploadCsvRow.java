@@ -23,6 +23,7 @@ public class ProductUploadCsvRow {
   private String manufacturer; //제조사
 
   private int salesPrice;
+  private int stockQuantity;
 
   public static ProductUploadCsvRow of(Long sellerId, String category, String productName,
       String salesStartDate, String salesEndDate, String productStatus, String brand,
@@ -40,6 +41,4 @@ public class ProductUploadCsvRow {
         stockQuantity
     );
   }
-
-  private int stockQuantity;
 }

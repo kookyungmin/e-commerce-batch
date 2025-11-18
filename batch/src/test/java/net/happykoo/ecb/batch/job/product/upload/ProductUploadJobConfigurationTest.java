@@ -35,7 +35,6 @@ class ProductUploadJobConfigurationTest extends BaseBatchIntegrationTest {
 
     assertAll(() -> assertJobCompleted(jobExecution),
         () -> assertThat(productService.countProducts()).isEqualTo(6));
-    ;
   }
 
   private JobParameters jobParameters() throws IOException {
