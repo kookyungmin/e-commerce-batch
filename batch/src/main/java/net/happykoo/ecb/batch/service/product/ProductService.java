@@ -1,5 +1,6 @@
 package net.happykoo.ecb.batch.service.product;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.happykoo.ecb.batch.domain.product.Product;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,5 +35,9 @@ public class ProductService {
         product.getStockQuantity(),
         product.getCreatedAt(),
         product.getUpdatedAt());
+  }
+
+  public List<String> getProductIds() {
+    return jdbcTemplate.queryForList("select product_id from products", String.class);
   }
 }

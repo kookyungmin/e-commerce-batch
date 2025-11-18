@@ -1,8 +1,10 @@
 package net.happykoo.ecb.batch.util;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -72,5 +74,17 @@ public class FileUtils {
     tempFile.deleteOnExit();
 
     return tempFile;
+  }
+
+  public static void mergeFile(String header, List<File> files, File outputFile) {
+    try (BufferedOutputStream outputStream = new BufferedOutputStream(
+        new FileOutputStream(outputFile))) {
+      outputStream.write((header + "\n").getBytes(StandardCharsets.UTF_8));
+      for (File file : files) {
+        Files.copy(file.toPath(), outputStream);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }
