@@ -23,10 +23,13 @@ import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuild
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.item.support.SynchronizedItemStreamWriter;
+import org.springframework.batch.item.support.builder.SynchronizedItemStreamWriterBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -48,7 +51,8 @@ public class ProductDownloadJobConfiguration {
       StepExecutionListener listener,
       ItemReader<Product> productPagingReader,
       ItemProcessor<Product, ProductDownloadCsvRow> productDownloadProcessor,
-      ItemWriter<ProductDownloadCsvRow> productCsvWriter) {
+      ItemWriter<ProductDownloadCsvRow> productCsvWriter,
+      TaskExecutor taskExecutor) {
     return new StepBuilder("productPagingStep", jobRepository)
         .<Product, ProductDownloadCsvRow>chunk(1000, transactionManager)
         .listener(listener)
@@ -56,6 +60,7 @@ public class ProductDownloadJobConfiguration {
         .processor(productDownloadProcessor)
         .writer(productCsvWriter)
         .allowStartIfComplete(true)
+        .taskExecutor(taskExecutor)
         .build();
   }
 
@@ -106,16 +111,19 @@ public class ProductDownloadJobConfiguration {
 
   @Bean
   @StepScope
-  public FlatFileItemWriter<ProductDownloadCsvRow> productCsvWriter(
+  public SynchronizedItemStreamWriter<ProductDownloadCsvRow> productCsvWriter(
       @Value("#{jobParameters['outputFilePath']}") String path) {
     List<String> columns = ReflectionUtils.getFieldNames(ProductDownloadCsvRow.class);
 
-    return new FlatFileItemWriterBuilder<ProductDownloadCsvRow>()
+    FlatFileItemWriter<ProductDownloadCsvRow> flatFileItemWriter = new FlatFileItemWriterBuilder<ProductDownloadCsvRow>()
         .name("productCsvWriter")
         .resource(new FileSystemResource(path))
         .delimited()
         .names(columns.toArray(String[]::new))
         .headerCallback(writer -> writer.write(String.join(",", columns)))
+        .build();
+    return new SynchronizedItemStreamWriterBuilder<ProductDownloadCsvRow>()
+        .delegate(flatFileItemWriter)
         .build();
   }
 }
