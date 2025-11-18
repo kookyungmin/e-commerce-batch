@@ -13,8 +13,8 @@ spring:
 logging:
   level:
     root: INFO
-    org.springframework.jdbc.core.jdbcTemplate: DEBUG
-    org.springframework.jdbc.core.StatementCreatorUtils: DEBUG
+#    org.springframework.jdbc.core.jdbcTemplate: DEBUG
+#    org.springframework.jdbc.core.StatementCreatorUtils: TRACE
 prometheus:
   job:
     name: spring-batch
