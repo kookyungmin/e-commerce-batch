@@ -17,7 +17,7 @@ public class FileUtils {
   public static List<File> splitCsv(File csvFile, int gridSize) {
     try (Stream<String> stream = Files.lines(csvFile.toPath(), StandardCharsets.UTF_8)) {
       long lineCount = stream.count();
-      long linesPerFile = (long) Math.ceil(lineCount / gridSize);
+      long linesPerFile = (long) Math.ceil(lineCount / (double) gridSize);
 
       return splitCsvByLinesPerFile(csvFile, linesPerFile);
     } catch (IOException e) {
@@ -57,7 +57,9 @@ public class FileUtils {
           shouldCreateFile = true;
         }
       }
-      writer.close();
+      if (writer != null) {
+        writer.close();
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -67,7 +69,6 @@ public class FileUtils {
 
   public static File createTempFile(String prefix, String suffix) throws IOException {
     File tempFile = File.createTempFile(prefix, suffix);
-    //JVM 이 종료되면 임시파일도 삭제됨
     tempFile.deleteOnExit();
 
     return tempFile;
