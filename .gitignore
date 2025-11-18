@@ -28,4 +28,3 @@ out/
 tools/postgres/data/*
 tools/grafana/data/*
 tools/prometheus/data/*
-!tools/postgres/data/postgresql.conf

@@ -21,3 +21,5 @@ create index idx_products_brand on products (brand);
 create index idx_products_manufacturer on products (manufacturer);
 create index idx_products_seller_id on products (seller_id);
 
+
+

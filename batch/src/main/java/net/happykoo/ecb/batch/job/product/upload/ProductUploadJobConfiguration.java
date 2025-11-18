@@ -1,7 +1,6 @@
 package net.happykoo.ecb.batch.job.product.upload;
 
 import java.io.File;
-import java.sql.Timestamp;
 import javax.sql.DataSource;
 import net.happykoo.ecb.batch.domain.product.Product;
 import net.happykoo.ecb.batch.dto.ProductUploadCsvRow;
@@ -26,6 +25,8 @@ import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.support.SynchronizedItemStreamReader;
+import org.springframework.batch.item.support.builder.SynchronizedItemStreamReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -90,20 +91,19 @@ public class ProductUploadJobConfiguration {
       TaskExecutor taskExecutor) {
 
     return new StepBuilder("productUploadStep", jobRepository)
-        .<ProductUploadCsvRow, Product>chunk(1000, transactionManager)
+        .<ProductUploadCsvRow, Product>chunk(2000, transactionManager)
         .reader(productReader)
         .processor(productProcessor)
         .writer(productWriter)
         .allowStartIfComplete(true) //완료되어도 재실행 가능(개발단계에서만 true)
         .listener(stepExecutionListener)
-//        .taskExecutor(taskExecutor) //멀티 쓰레드 병렬 처리
+        .taskExecutor(taskExecutor) //멀티 쓰레드 병렬 처리
         .build();
   }
 
   @Bean
   @StepScope
-//  public SynchronizedItemStreamReader<ProductUploadCsvRow> productReader(
-  public FlatFileItemReader<ProductUploadCsvRow> productReader(
+  public SynchronizedItemStreamReader<ProductUploadCsvRow> productReader(
       @Value("#{stepExecutionContext['file']}") File file) {
     FlatFileItemReader fileItemReader = new FlatFileItemReaderBuilder<ProductUploadCsvRow>()
         .name("productReader")
@@ -115,10 +115,9 @@ public class ProductUploadJobConfiguration {
         .build();
 
     //Thread safe 하게 설정
-//    return new SynchronizedItemStreamReaderBuilder<ProductUploadCsvRow>()
-//        .delegate(fileItemReader)
-//        .build();
-    return fileItemReader;
+    return new SynchronizedItemStreamReaderBuilder<ProductUploadCsvRow>()
+        .delegate(fileItemReader)
+        .build();
   }
 
   @Bean
@@ -133,27 +132,29 @@ public class ProductUploadJobConfiguration {
         INSERT INTO products(product_id, seller_id, category, product_name, 
             sales_start_date, sales_end_date, product_status, brand, manufacturer, 
             sales_price, stock_quantity, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (:productId, :sellerId, :category, :productName,
+                :salesStartDate, :salesEndDate, :productStatus, :brand, :manufacturer,
+                :salesPrice, :stockQuantity, :createdAt, :updatedAt)
         """;
     return new JdbcBatchItemWriterBuilder<Product>()
         .dataSource(dataSource)
         .sql(sql)
-//        .beanMapped() enum 때문에 변경
-        .itemPreparedStatementSetter((product, ps) -> {
-          ps.setString(1, product.getProductId());
-          ps.setLong(2, product.getSellerId());
-          ps.setString(3, product.getCategory());
-          ps.setString(4, product.getProductName());
-          ps.setObject(5, product.getSalesStartDate());
-          ps.setObject(6, product.getSalesEndDate());
-          ps.setString(7, product.getProductStatus().name());
-          ps.setString(8, product.getBrand());
-          ps.setString(9, product.getManufacturer());
-          ps.setInt(10, product.getSalesPrice());
-          ps.setInt(11, product.getStockQuantity());
-          ps.setTimestamp(12, Timestamp.valueOf(product.getCreatedAt()));
-          ps.setTimestamp(13, Timestamp.valueOf(product.getUpdatedAt()));
-        })
+        .beanMapped()
+//        .itemPreparedStatementSetter((product, ps) -> {
+//          ps.setString(1, product.getProductId());
+//          ps.setLong(2, product.getSellerId());
+//          ps.setString(3, product.getCategory());
+//          ps.setString(4, product.getProductName());
+//          ps.setObject(5, product.getSalesStartDate());
+//          ps.setObject(6, product.getSalesEndDate());
+//          ps.setString(7, product.getProductStatus().name());
+//          ps.setString(8, product.getBrand());
+//          ps.setString(9, product.getManufacturer());
+//          ps.setInt(10, product.getSalesPrice());
+//          ps.setInt(11, product.getStockQuantity());
+//          ps.setTimestamp(12, Timestamp.valueOf(product.getCreatedAt()));
+//          ps.setTimestamp(13, Timestamp.valueOf(product.getUpdatedAt()));
+//        })
         .build();
   }
 }

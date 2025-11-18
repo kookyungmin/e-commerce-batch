@@ -22,7 +22,7 @@ public class Product {
   private String productName;
   private LocalDate salesStartDate; //판매 시작일
   private LocalDate salesEndDate; //판매 종료일
-  private ProductStatus productStatus;
+  private String productStatus;
   private String brand; //브랜드
   private String manufacturer; //제조사
 
@@ -40,7 +40,7 @@ public class Product {
         row.getProductName(),
         DateTimeUtils.toLocalDate(row.getSalesStartDate()),
         DateTimeUtils.toLocalDate(row.getSalesStartDate()),
-        ProductStatus.valueOf(row.getProductStatus()),
+        row.getProductStatus(),
         row.getBrand(),
         row.getManufacturer(),
         row.getSalesPrice(),
