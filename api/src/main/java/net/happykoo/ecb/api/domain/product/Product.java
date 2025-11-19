@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "products")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class Product {

@@ -35,5 +35,4 @@ public class ProductController {
     return productService.getAllProducts(pageable)
         .map(ProductResponse::from);
   }
-
 }
