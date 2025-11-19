@@ -1,4 +1,4 @@
-package net.happykoo.ecb.api.service.dto;
+package net.happykoo.ecb.api.service.order.dto;
 
 import net.happykoo.ecb.api.domain.order.OrderItem;
 

@@ -2,7 +2,7 @@ package net.happykoo.ecb.api.controller;
 
 import lombok.RequiredArgsConstructor;
 import net.happykoo.ecb.api.controller.dto.ProductResponse;
-import net.happykoo.ecb.api.service.ProductService;
+import net.happykoo.ecb.api.service.product.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

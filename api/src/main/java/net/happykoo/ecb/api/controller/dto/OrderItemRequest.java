@@ -1,6 +1,6 @@
 package net.happykoo.ecb.api.controller.dto;
 
-import net.happykoo.ecb.api.service.dto.OrderItemCommand;
+import net.happykoo.ecb.api.service.order.dto.OrderItemCommand;
 
 public record OrderItemRequest(String productId, int quantity) {
 

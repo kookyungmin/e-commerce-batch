@@ -1,10 +1,10 @@
-package net.happykoo.ecb.api.service;
+package net.happykoo.ecb.api.service.product;
 
 import lombok.RequiredArgsConstructor;
 import net.happykoo.ecb.api.domain.product.Product;
 import net.happykoo.ecb.api.domain.product.ProductNotFoundException;
 import net.happykoo.ecb.api.repository.ProductRepository;
-import net.happykoo.ecb.api.service.dto.ProductResult;
+import net.happykoo.ecb.api.service.product.dto.ProductResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

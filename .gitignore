@@ -28,3 +28,5 @@ out/
 tools/postgres/data/*
 tools/grafana/data/*
 tools/prometheus/data/*
+
+logs/

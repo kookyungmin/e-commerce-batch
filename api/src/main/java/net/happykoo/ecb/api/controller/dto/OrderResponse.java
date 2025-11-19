@@ -5,7 +5,7 @@ import java.util.List;
 import net.happykoo.ecb.api.domain.order.OrderStatus;
 import net.happykoo.ecb.api.domain.payment.PaymentMethod;
 import net.happykoo.ecb.api.domain.payment.PaymentStatus;
-import net.happykoo.ecb.api.service.dto.OrderResult;
+import net.happykoo.ecb.api.service.order.dto.OrderResult;
 
 public record OrderResponse(
     Long orderId,

@@ -2,7 +2,7 @@ package net.happykoo.ecb.api.controller.dto;
 
 import java.time.LocalDate;
 import net.happykoo.ecb.api.domain.product.ProductStatus;
-import net.happykoo.ecb.api.service.dto.ProductResult;
+import net.happykoo.ecb.api.service.product.dto.ProductResult;
 
 public record ProductResponse(
     String productId,

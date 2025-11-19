@@ -2,7 +2,7 @@ package net.happykoo.ecb.api.controller.dto;
 
 import java.util.List;
 import net.happykoo.ecb.api.domain.payment.PaymentMethod;
-import net.happykoo.ecb.api.service.dto.OrderItemCommand;
+import net.happykoo.ecb.api.service.order.dto.OrderItemCommand;
 
 public record OrderRequest(
     Long customerId,
