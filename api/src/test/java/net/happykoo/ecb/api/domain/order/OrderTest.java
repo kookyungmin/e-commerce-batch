@@ -79,7 +79,7 @@ class OrderTest {
     order.cancel();
 
     assertAll(
-        () -> assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.CANCEL),
+        () -> assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.CANCELED),
         () -> assertThat(order.getPaymentStatus()).isEqualTo(PaymentStatus.REFUNDED),
         () -> assertThat(order.isPaymentSuccess()).isFalse()
     );

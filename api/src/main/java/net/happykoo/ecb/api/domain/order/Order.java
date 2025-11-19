@@ -130,6 +130,6 @@ public class Order {
       throw new IllegalOrderStateException("이미 완료된 주문은 취소할 수 없습니다.");
     }
     payment.cancel();
-    orderStatus = OrderStatus.CANCEL;
+    orderStatus = OrderStatus.CANCELED;
   }
 }
