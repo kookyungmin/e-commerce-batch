@@ -63,12 +63,6 @@ public class Order {
     payment = Payment.createPayment(paymentMethod, calculateTotalAmount(), this);
   }
 
-  private Integer calculateTotalAmount() {
-    return orderItems.stream()
-        .mapToInt(item -> item.getUnitPrice() * item.getQuantity())
-        .sum();
-  }
-
   public void completePayment() {
     if (orderStatus != OrderStatus.PENDING_PAYMENT) {
       throw new IllegalOrderStateException("결제 처리를 처리할 수 없는 상태입니다.");
@@ -85,8 +79,36 @@ public class Order {
     orderStatus = OrderStatus.PROCESSING;
   }
 
+  public Long countProducts() {
+    return (long) orderItems.size();
+  }
+
+  public Long calculateTotalItemQuantity() {
+    return orderItems.stream()
+        .mapToLong(OrderItem::getQuantity)
+        .sum();
+  }
+
+  public Integer calculateTotalAmount() {
+    return orderItems.stream()
+        .mapToInt(item -> item.getUnitPrice() * item.getQuantity())
+        .sum();
+  }
+
   public PaymentStatus getPaymentStatus() {
     return payment.getPaymentStatus();
+  }
+
+  public Long getPaymentId() {
+    return payment.getPaymentId();
+  }
+
+  public PaymentMethod getPaymentMethod() {
+    return payment.getPaymentMethod();
+  }
+
+  public LocalDateTime getPaymentDate() {
+    return payment.getPaymentDate();
   }
 
   public boolean isPaymentSuccess() {

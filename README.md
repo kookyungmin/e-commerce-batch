@@ -35,7 +35,10 @@ Spring Batch를 활용한 이커머스 대용량 처리 시스템
 ### Spring Boot application 실행
 
 `./gradlew bootRun`
+
 `--spring.boot.job.names=productUploadJob inputFilePath=batch/data/random_product.csv,java.lang.String,false`
+
+`--spring.batch.job.name=productDownloadJob outputFilePath=batch/data/download_product.csv,java.lang.String,false gridSize=8,java.lang.Integer,false`
 
 ## docker 실행 상태에서 DB 접근
 

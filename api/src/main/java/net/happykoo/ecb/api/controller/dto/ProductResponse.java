@@ -2,7 +2,7 @@ package net.happykoo.ecb.api.controller.dto;
 
 import java.time.LocalDate;
 import net.happykoo.ecb.api.domain.product.ProductStatus;
-import net.happykoo.ecb.api.service.product.dto.ProductDto;
+import net.happykoo.ecb.api.service.dto.ProductResult;
 
 public record ProductResponse(
     String productId,
@@ -18,7 +18,7 @@ public record ProductResponse(
     int stockQuantity
 ) {
 
-  public static ProductResponse from(ProductDto product) {
+  public static ProductResponse from(ProductResult product) {
     return new ProductResponse(
         product.productId(),
         product.sellerId(),

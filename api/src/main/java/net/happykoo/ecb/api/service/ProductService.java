@@ -1,10 +1,10 @@
-package net.happykoo.ecb.api.service.product;
+package net.happykoo.ecb.api.service;
 
 import lombok.RequiredArgsConstructor;
 import net.happykoo.ecb.api.domain.product.Product;
 import net.happykoo.ecb.api.domain.product.ProductNotFoundException;
 import net.happykoo.ecb.api.repository.ProductRepository;
-import net.happykoo.ecb.api.service.product.dto.ProductDto;
+import net.happykoo.ecb.api.service.dto.ProductResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,13 +16,13 @@ public class ProductService {
 
   private final ProductRepository productRepository;
 
-  public ProductDto findProduct(String productId) {
-    return ProductDto.from(findProductById(productId));
+  public ProductResult findProduct(String productId) {
+    return ProductResult.from(findProductById(productId));
   }
 
-  public Page<ProductDto> getAllProducts(Pageable pageable) {
+  public Page<ProductResult> getAllProducts(Pageable pageable) {
     return productRepository.findAll(pageable)
-        .map(ProductDto::from);
+        .map(ProductResult::from);
   }
 
   @Transactional

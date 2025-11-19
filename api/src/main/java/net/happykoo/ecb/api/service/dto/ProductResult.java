@@ -1,10 +1,10 @@
-package net.happykoo.ecb.api.service.product.dto;
+package net.happykoo.ecb.api.service.dto;
 
 import java.time.LocalDate;
 import net.happykoo.ecb.api.domain.product.Product;
 import net.happykoo.ecb.api.domain.product.ProductStatus;
 
-public record ProductDto(
+public record ProductResult(
     String productId,
     Long sellerId,
     String category,
@@ -18,8 +18,8 @@ public record ProductDto(
     int stockQuantity
 ) {
 
-  public static ProductDto from(Product product) {
-    return new ProductDto(
+  public static ProductResult from(Product product) {
+    return new ProductResult(
         product.getProductId(),
         product.getSellerId(),
         product.getCategory(),
