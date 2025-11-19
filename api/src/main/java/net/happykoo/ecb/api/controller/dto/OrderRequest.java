@@ -10,7 +10,12 @@ public record OrderRequest(
     PaymentMethod paymentMethod
 ) {
 
-  public List<OrderItemCommand> getOrderItemCommands() {
+  public static OrderRequest of(Long customerId, List<OrderItemRequest> orderItems,
+      PaymentMethod paymentMethod) {
+    return new OrderRequest(customerId, orderItems, paymentMethod);
+  }
+
+  public List<OrderItemCommand> toOrderItemCommands() {
     return orderItems.stream()
         .map(OrderItemRequest::toCommand)
         .toList();

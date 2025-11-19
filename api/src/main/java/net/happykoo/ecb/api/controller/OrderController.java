@@ -22,7 +22,7 @@ public class OrderController {
   public OrderResponse createOrder(@RequestBody OrderRequest orderRequest) {
     return OrderResponse.from(
         orderService.createOrder(orderRequest.customerId(),
-            orderRequest.getOrderItemCommands(),
+            orderRequest.toOrderItemCommands(),
             orderRequest.paymentMethod()));
   }
 
