@@ -1,5 +1,5 @@
 ### 상품 단건 조회
-GET http://localhost:8080/api/v1/products/1763593740944_7628f396-9619-45c7-91ef-566eeed879b1
+GET http://localhost:8080/api/v1/products/1763599154947_3fd565db-dc6c-4c7d-9a79-77c43a7c806e
 Content-Type: application/json
 
 ### 상품 페이징 조회
@@ -14,7 +14,7 @@ Content-Type: application/json
   "customerId": 1,
   "orderItems": [
     {
-      "productId": "1763593740944_7628f396-9619-45c7-91ef-566eeed879b1",
+      "productId": "1763599154947_3fd565db-dc6c-4c7d-9a79-77c43a7c806e",
       "quantity": 3
     }
   ],
