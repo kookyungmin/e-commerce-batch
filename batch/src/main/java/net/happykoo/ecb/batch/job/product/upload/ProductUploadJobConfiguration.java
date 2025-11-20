@@ -92,7 +92,7 @@ public class ProductUploadJobConfiguration {
       TaskExecutor taskExecutor) {
 
     return new StepBuilder("productUploadStep", jobRepository)
-        .<ProductUploadCsvRow, Product>chunk(2000, transactionManager)
+        .<ProductUploadCsvRow, Product>chunk(1000, transactionManager)
         .reader(productReader)
         .processor(productProcessor)
         .writer(productWriter)
@@ -127,7 +127,6 @@ public class ProductUploadJobConfiguration {
   }
 
   @Bean
-  @StepScope
   public JdbcBatchItemWriter<Product> productWriter(DataSource dataSource) {
     String sql = """
         INSERT INTO products(product_id, seller_id, category, product_name, 

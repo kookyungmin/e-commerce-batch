@@ -17,7 +17,7 @@ Spring Batch를 활용한 이커머스 대용량 처리 시스템
 - [springboot] 3.3.4
 - [springbatch] 3.3.4
 - [docker] 20.10.12
-- [postgresql] 16.10
+- [postgresql] 18.1
 - [prometheus] 2.7.2
 - [pushgateway] 0.6.0
 - [grafana] 6.0.2

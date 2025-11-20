@@ -105,11 +105,11 @@ public class OrderRequester {
         OrderResponse orderResponse = OBJECT_MAPPER.readValue(response.body(), OrderResponse.class);
         return orderResponse;
       } else {
-        System.out.println("주문 생성 중 오류 발생");
+//        System.out.println("주문 생성 중 오류 발생");
         return null;
       }
     } catch (Exception e) {
-      System.out.println("ERROR ! " + e.getMessage());
+//      System.out.println("ERROR ! " + e.getMessage());
       return null;
     }
   }
@@ -133,10 +133,10 @@ public class OrderRequester {
       HttpResponse<String> response = sendPostRequest(ORDERS_URL + "/" + orderId + "/payment",
           requestBody);
       if (response.statusCode() != 200) {
-        System.out.println("결제처리 중 오류 발생");
+//        System.out.println("결제처리 중 오류 발생");
       }
     } catch (Exception e) {
-      System.out.println("ERROR ! " + e.getMessage());
+//      System.out.println("ERROR ! " + e.getMessage());
     }
   }
 
@@ -145,10 +145,10 @@ public class OrderRequester {
       HttpResponse<String> response = sendPostRequest(ORDERS_URL + "/" + orderId + "/complete",
           "");
       if (response.statusCode() != 200) {
-        System.out.println("주문 완료 중 오류 발생");
+//        System.out.println("주문 완료 중 오류 발생");
       }
     } catch (Exception e) {
-      System.out.println("ERROR ! " + e.getMessage());
+//      System.out.println("ERROR ! " + e.getMessage());
     }
   }
 
@@ -157,10 +157,10 @@ public class OrderRequester {
       HttpResponse<String> response = sendPostRequest(ORDERS_URL + "/" + orderId + "/cancel",
           "");
       if (response.statusCode() != 200) {
-        System.out.println("주문 취소 중 오류 발생");
+//        System.out.println("주문 취소 중 오류 발생");
       }
     } catch (Exception e) {
-      System.out.println("ERROR ! " + e.getMessage());
+//      System.out.println("ERROR ! " + e.getMessage());
     }
   }
 

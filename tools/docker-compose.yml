@@ -1,9 +1,10 @@
 services:
   postgres:
-    image: postgres:16
+    image: postgres:latest
     container_name: ecb-postgres
     volumes:
-      - ./postgres/data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/18/docker
+      - ./postgres/postgresql.conf:/var/lib/postgresql/18/docker/postgresql.conf
     ports:
       - '15432:5432'
     environment:
@@ -16,7 +17,7 @@ services:
     restart: always
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/data:/prometheus
+      - /var/docker/prometheus/data:/prometheus
     ports:
       - '19090:9090'
   pushgateway:
@@ -32,8 +33,10 @@ services:
     ports:
       - '13000:3000'
     volumes:
-      - ./grafana/data:/var/lib/grafana
+      - /var/docker/grafana/data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
+volumes:
+  postgres_data:
