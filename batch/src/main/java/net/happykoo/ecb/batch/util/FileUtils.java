@@ -16,20 +16,30 @@ import java.util.stream.Stream;
 
 public class FileUtils {
 
-  public static List<File> splitCsv(File csvFile, int gridSize) {
+  public static List<File> splitCsv(File csvFile, int fileCount) {
+    return splitFileAfterLineCount(csvFile, fileCount, true, ".csv");
+  }
+
+  public static List<File> splitLog(File logFile, int fileCount) {
+    return splitFileAfterLineCount(logFile, fileCount, false, ".log");
+  }
+
+  public static List<File> splitFileAfterLineCount(File csvFile, int gridSize,
+      boolean ignoreFirstLine, String suffix) {
     try (Stream<String> stream = Files.lines(csvFile.toPath(), StandardCharsets.UTF_8)) {
       long lineCount = stream.count();
       long linesPerFile = (long) Math.ceil(lineCount / (double) gridSize);
 
-      return splitCsvByLinesPerFile(csvFile, linesPerFile);
+      return splitFile(csvFile, linesPerFile, ignoreFirstLine, suffix);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private static List<File> splitCsvByLinesPerFile(File csvFile, long linesPerFile) {
+  private static List<File> splitFile(File file, long linesPerFile, boolean ignoreFirstLine,
+      String suffix) {
     List<File> splitFiles = new ArrayList<>();
-    try (BufferedReader reader = new BufferedReader(new FileReader(csvFile))) {
+    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
       String line;
       boolean isFirstLine = true;
       boolean shouldCreateFile = true;
@@ -39,12 +49,12 @@ public class FileUtils {
       int fileIndex = 0;
       int lineCount = 0;
       while ((line = reader.readLine()) != null) {
-        if (isFirstLine) {
+        if (!ignoreFirstLine && isFirstLine) {
           isFirstLine = false;
           continue;
         }
         if (shouldCreateFile) {
-          splitFile = createTempFile("split_" + (fileIndex++) + "_", ".csv");
+          splitFile = createTempFile("split_" + (fileIndex++) + "_", suffix);
           writer = new BufferedWriter(new FileWriter(splitFile));
           splitFiles.add(splitFile);
           lineCount = 0;

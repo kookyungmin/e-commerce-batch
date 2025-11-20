@@ -1,17 +1,23 @@
 package net.happykoo.ecb.batch.job.transaction.report;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import javax.sql.DataSource;
 import net.happykoo.ecb.batch.domain.transaction.TransactionReport;
 import net.happykoo.ecb.batch.domain.transaction.TransactionReportMapRepository;
 import net.happykoo.ecb.batch.dto.transaction.TransactionLog;
+import net.happykoo.ecb.batch.service.file.SplitFilePartitioner;
 import net.happykoo.ecb.batch.service.transaction.TransactionReportAccumulator;
+import net.happykoo.ecb.batch.util.FileUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.partition.PartitionHandler;
+import org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
@@ -36,13 +42,46 @@ public class TransactionJobConfiguration {
   @Bean
   public Job transactionReportJob(JobRepository jobRepository,
       JobExecutionListener jobExecutionListener,
-      Step txAccumulatorStep,
+      Step txAccumulatorPartitionStep,
       Step txSaveStep) {
     return new JobBuilder("transactionReportJob", jobRepository)
-        .start(txAccumulatorStep)
+        .start(txAccumulatorPartitionStep)
         .next(txSaveStep)
         .listener(jobExecutionListener)
         .build();
+  }
+
+  @Bean
+  public Step txAccumulatorPartitionStep(JobRepository jobRepository,
+      Step txAccumulatorStep,
+      PartitionHandler logFilePartitionHandler,
+      SplitFilePartitioner splitLogFilePartitioner) {
+
+    return new StepBuilder("txAccumulatorPartitionStep", jobRepository)
+        .partitioner(txAccumulatorStep.getName(), splitLogFilePartitioner)
+        .partitionHandler(logFilePartitionHandler)
+        .allowStartIfComplete(true)
+        .build();
+  }
+
+  @Bean
+  @JobScope
+  public SplitFilePartitioner splitLogFilePartitioner(
+      @Value("#{jobParameters['inputFilePath']}") String path,
+      @Value("#{jobParameters['gridSize']}") int gridSize) {
+    return new SplitFilePartitioner(FileUtils.splitLog(new File(path), gridSize));
+  }
+
+  @Bean
+  @JobScope
+  public TaskExecutorPartitionHandler logFilePartitionHandler(TaskExecutor taskExecutor,
+      Step txAccumulatorStep) {
+    TaskExecutorPartitionHandler handler = new TaskExecutorPartitionHandler();
+
+    handler.setTaskExecutor(taskExecutor);
+    handler.setStep(txAccumulatorStep);
+
+    return handler;
   }
 
   @Bean
