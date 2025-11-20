@@ -21,10 +21,13 @@ import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilde
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.support.IteratorItemReader;
+import org.springframework.batch.item.support.SynchronizedItemStreamReader;
+import org.springframework.batch.item.support.builder.SynchronizedItemStreamReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -47,25 +50,30 @@ public class TransactionJobConfiguration {
       StepExecutionListener stepExecutionListener,
       PlatformTransactionManager transactionManager,
       ItemReader<TransactionLog> logReader,
-      ItemWriter<TransactionLog> logAccumulator) {
+      ItemWriter<TransactionLog> logAccumulator,
+      TaskExecutor taskExecutor) {
     return new StepBuilder("txAccumulatorStep", jobRepository)
         .<TransactionLog, TransactionLog>chunk(1000, transactionManager)
         .reader(logReader)
         .writer(logAccumulator)
         .allowStartIfComplete(true)
         .listener(stepExecutionListener)
+        .taskExecutor(taskExecutor)
         .build();
   }
 
   @Bean
   @StepScope
-  public FlatFileItemReader<TransactionLog> logReader(
+  public SynchronizedItemStreamReader<TransactionLog> logReader(
       @Value("#{jobParameters['inputFilePath']}") String inputFilePath,
       ObjectMapper objectMapper) {
-    return new FlatFileItemReaderBuilder<TransactionLog>()
+    FlatFileItemReader<TransactionLog> reader = new FlatFileItemReaderBuilder<TransactionLog>()
         .name("logReader")
         .resource(new FileSystemResource(inputFilePath))
         .lineMapper(((line, lineNumber) -> objectMapper.readValue(line, TransactionLog.class)))
+        .build();
+    return new SynchronizedItemStreamReaderBuilder<TransactionLog>()
+        .delegate(reader)
         .build();
   }
 

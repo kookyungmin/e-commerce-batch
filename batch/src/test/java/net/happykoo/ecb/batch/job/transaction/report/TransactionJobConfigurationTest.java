@@ -23,7 +23,7 @@ class TransactionJobConfigurationTest extends BaseBatchIntegrationTest {
   private Resource resource;
 
   @Test
-  void name(@Autowired Job transactionReportJob) throws Exception {
+  void transactionReportJobTest(@Autowired Job transactionReportJob) throws Exception {
     jobLauncherTestUtils.setJob(transactionReportJob);
     JobParameters jobParameters = getJobParameters();
 
