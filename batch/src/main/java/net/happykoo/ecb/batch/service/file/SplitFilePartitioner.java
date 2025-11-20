@@ -19,7 +19,7 @@ public class SplitFilePartitioner implements Partitioner {
     Map<String, ExecutionContext> partitionMap = new HashMap<>();
     for (int i = 0; i < splitFiles.size(); i++) {
       ExecutionContext executionContext = new ExecutionContext();
-      executionContext.put("file", splitFiles.get(i).getAbsolutePath());
+      executionContext.put("file", splitFiles.get(i));
       partitionMap.put("partition" + i, executionContext);
     }
     return partitionMap;

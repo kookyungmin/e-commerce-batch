@@ -105,10 +105,10 @@ public class ProductUploadJobConfiguration {
   @Bean
   @StepScope
   public SynchronizedItemStreamReader<ProductUploadCsvRow> productReader(
-      @Value("#{stepExecutionContext['file']}") String filePath) {
+      @Value("#{stepExecutionContext['file']}") File file) {
     FlatFileItemReader<ProductUploadCsvRow> fileItemReader = new FlatFileItemReaderBuilder<ProductUploadCsvRow>()
         .name("productReader")
-        .resource(new FileSystemResource(filePath))
+        .resource(new FileSystemResource(file))
         .delimited() //default 콤마(,)
         .names(ReflectionUtils.getFieldNames(ProductUploadCsvRow.class).toArray(String[]::new))
         .targetType(ProductUploadCsvRow.class)

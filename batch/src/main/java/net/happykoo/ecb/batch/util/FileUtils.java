@@ -17,18 +17,18 @@ import java.util.stream.Stream;
 public class FileUtils {
 
   public static List<File> splitCsv(File csvFile, int fileCount) {
-    return splitFileAfterLineCount(csvFile, fileCount, true, ".csv");
+    return splitFileAfterLineCount(csvFile, fileCount, false, ".csv");
   }
 
   public static List<File> splitLog(File logFile, int fileCount) {
-    return splitFileAfterLineCount(logFile, fileCount, false, ".log");
+    return splitFileAfterLineCount(logFile, fileCount, true, ".log");
   }
 
-  public static List<File> splitFileAfterLineCount(File csvFile, int gridSize,
+  public static List<File> splitFileAfterLineCount(File csvFile, int fileCount,
       boolean ignoreFirstLine, String suffix) {
     try (Stream<String> stream = Files.lines(csvFile.toPath(), StandardCharsets.UTF_8)) {
       long lineCount = stream.count();
-      long linesPerFile = (long) Math.ceil(lineCount / (double) gridSize);
+      long linesPerFile = (long) Math.ceil(lineCount / (double) fileCount);
 
       return splitFile(csvFile, linesPerFile, ignoreFirstLine, suffix);
     } catch (IOException e) {

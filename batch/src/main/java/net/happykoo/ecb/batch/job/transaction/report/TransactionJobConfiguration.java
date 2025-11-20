@@ -104,11 +104,11 @@ public class TransactionJobConfiguration {
   @Bean
   @StepScope
   public SynchronizedItemStreamReader<TransactionLog> logReader(
-      @Value("#{jobParameters['inputFilePath']}") String inputFilePath,
+      @Value("#{stepExecutionContext['file']}") File logFile,
       ObjectMapper objectMapper) {
     FlatFileItemReader<TransactionLog> reader = new FlatFileItemReaderBuilder<TransactionLog>()
         .name("logReader")
-        .resource(new FileSystemResource(inputFilePath))
+        .resource(new FileSystemResource(logFile))
         .lineMapper(((line, lineNumber) -> objectMapper.readValue(line, TransactionLog.class)))
         .build();
     return new SynchronizedItemStreamReaderBuilder<TransactionLog>()
