@@ -1,5 +1,6 @@
 package net.happykoo.ecb.api.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -31,12 +32,13 @@ public class OrderRequester {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Random random = new Random();
+  private static final ExecutorService executor = Executors.newFixedThreadPool(200);
 
-  private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+  private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+      .executor(executor)
+      .build();
 
   public static void main(String[] args) {
-    int maxWorker = 20;
-    ExecutorService executor = Executors.newFixedThreadPool(maxWorker);
     List<CompletableFuture<Void>> futures = new ArrayList<>();
 
     OBJECT_MAPPER.registerModule(new JavaTimeModule());
@@ -44,10 +46,10 @@ public class OrderRequester {
 
     try {
       int page = 0;
-      int size = 1000;
+      int size = 10000;
       boolean hasNextPage = true;
 
-      while (hasNextPage && page < 10000) {
+      while (hasNextPage && page < 1000) {
         String productJson = fetchProduct(page, size);
         JsonNode productsNode = OBJECT_MAPPER.readTree(productJson);
         JsonNode contentNode = productsNode.get("content");
@@ -55,8 +57,7 @@ public class OrderRequester {
         for (JsonNode productNode : contentNode) {
           String productId = productNode.get("productId").asText();
           int stockQuantity = productNode.get("stockQuantity").asInt();
-          CompletableFuture<Void> future = CompletableFuture.runAsync(
-              () -> processProduct(productId, stockQuantity), executor);
+          CompletableFuture<Void> future = processProduct(productId, stockQuantity);
           futures.add(future);
         }
 
@@ -71,97 +72,87 @@ public class OrderRequester {
     executor.shutdown();
   }
 
-  private static void processProduct(String productId, int stockQuantity) {
+  private static CompletableFuture<Void> processProduct(String productId, int stockQuantity) {
     int quantity = Math.max((int) Math.floor(stockQuantity / 10.0), 1);
     int randomNum = random.nextInt(16); //0 ~ 15
+    return createOrder(productId, quantity)
+        .thenComposeAsync(orderResponse -> {
+          if (orderResponse == null) {
+            return CompletableFuture.completedFuture(null);
+          }
+          List<CompletableFuture<Void>> actions = new ArrayList<>();
+          if (randomNum % 4 < 2) {
+            //결제 완료 처리
+            actions.add(completePayment(orderResponse.orderId(), randomNum % 2 == 0));
+          }
 
-    OrderResponse orderResponse = createOrder(productId, quantity);
-    if (orderResponse != null) {
-      if (randomNum % 4 < 2) {
-        //결제 완료 처리
-        completePayment(orderResponse.orderId(), randomNum % 2 == 0);
-      }
+          if (randomNum % 8 < 4) {
+            //주문 완료 처리
+            actions.add(completeOrder(orderResponse.orderId()));
+          }
 
-      if (randomNum % 8 < 4) {
-        //주문 완료 처리
-        completeOrder(orderResponse.orderId());
-      }
-
-      if (randomNum % 16 < 8) {
-        //주문 취소 처리
-        cancelOrder(orderResponse.orderId());
-      }
-    }
+          if (randomNum % 16 < 8) {
+            //주문 취소 처리
+            actions.add(cancelOrder(orderResponse.orderId()));
+          }
+          return CompletableFuture.allOf(actions.toArray(new CompletableFuture[0]));
+        }, executor);
   }
 
-  private static OrderResponse createOrder(String productId, int quantity) {
+  private static CompletableFuture<OrderResponse> createOrder(String productId, int quantity) {
     OrderRequest orderRequest = OrderRequest.of(randomCustomerId(),
         List.of(OrderItemRequest.of(productId, quantity)),
         PAYMENT_METHODS[random.nextInt(PAYMENT_METHODS.length)]);
     try {
       String requestBody = OBJECT_MAPPER.writeValueAsString(orderRequest);
-      HttpResponse<String> response = sendPostRequest(ORDERS_URL, requestBody);
-      if (response.statusCode() == 200) {
-        OrderResponse orderResponse = OBJECT_MAPPER.readValue(response.body(), OrderResponse.class);
-        return orderResponse;
-      } else {
-//        System.out.println("주문 생성 중 오류 발생");
-        return null;
-      }
+      return sendPostRequest(ORDERS_URL, requestBody)
+          .thenApplyAsync(res -> {
+            if (res.statusCode() == 200) {
+              try {
+                return OBJECT_MAPPER.readValue(res.body(), OrderResponse.class);
+              } catch (JsonProcessingException e) {
+                return null;
+              }
+            } else {
+              return null;
+            }
+          }, executor);
     } catch (Exception e) {
-//      System.out.println("ERROR ! " + e.getMessage());
-      return null;
+      return CompletableFuture.completedFuture(null);
     }
   }
 
-  private static HttpResponse<String> sendPostRequest(String url, String requestBody)
-      throws IOException, InterruptedException {
+
+  private static CompletableFuture<HttpResponse<String>> sendPostRequest(String url,
+      String requestBody) {
     HttpRequest httpRequest = HttpRequest.newBuilder()
         .uri(URI.create(url))
         .header("Content-Type", "application/json")
         .POST(HttpRequest.BodyPublishers.ofString(requestBody))
         .build();
-    HttpResponse<String> response = HTTP_CLIENT.send(httpRequest,
+    return HTTP_CLIENT.sendAsync(httpRequest,
         HttpResponse.BodyHandlers.ofString());
-    return response;
   }
 
-  private static void completePayment(Long orderId, boolean success) {
+  private static CompletableFuture<Void> completePayment(Long orderId, boolean success) {
     PaymentRequest paymentRequest = PaymentRequest.of(success);
     try {
       String requestBody = OBJECT_MAPPER.writeValueAsString(paymentRequest);
-      HttpResponse<String> response = sendPostRequest(ORDERS_URL + "/" + orderId + "/payment",
-          requestBody);
-      if (response.statusCode() != 200) {
-//        System.out.println("결제처리 중 오류 발생");
-      }
+      return sendPostRequest(ORDERS_URL + "/" + orderId + "/payment", requestBody)
+          .thenApply(res -> null);
     } catch (Exception e) {
-//      System.out.println("ERROR ! " + e.getMessage());
+      return CompletableFuture.completedFuture(null);
     }
   }
 
-  private static void completeOrder(Long orderId) {
-    try {
-      HttpResponse<String> response = sendPostRequest(ORDERS_URL + "/" + orderId + "/complete",
-          "");
-      if (response.statusCode() != 200) {
-//        System.out.println("주문 완료 중 오류 발생");
-      }
-    } catch (Exception e) {
-//      System.out.println("ERROR ! " + e.getMessage());
-    }
+  private static CompletableFuture<Void> completeOrder(Long orderId) {
+    return sendPostRequest(ORDERS_URL + "/" + orderId + "/complete", "")
+        .thenApply(res -> null);
   }
 
-  private static void cancelOrder(Long orderId) {
-    try {
-      HttpResponse<String> response = sendPostRequest(ORDERS_URL + "/" + orderId + "/cancel",
-          "");
-      if (response.statusCode() != 200) {
-//        System.out.println("주문 취소 중 오류 발생");
-      }
-    } catch (Exception e) {
-//      System.out.println("ERROR ! " + e.getMessage());
-    }
+  private static CompletableFuture<Void> cancelOrder(Long orderId) {
+    return sendPostRequest(ORDERS_URL + "/" + orderId + "/cancel", "")
+        .thenApply(res -> null);
   }
 
   private static String fetchProduct(int page, int size) throws IOException, InterruptedException {
