@@ -1,4 +1,4 @@
-package net.happykoo.ecb.batch.dto;
+package net.happykoo.ecb.batch.dto.product;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -4,7 +4,7 @@ import java.io.File;
 import java.sql.Timestamp;
 import javax.sql.DataSource;
 import net.happykoo.ecb.batch.domain.product.Product;
-import net.happykoo.ecb.batch.dto.ProductUploadCsvRow;
+import net.happykoo.ecb.batch.dto.product.ProductUploadCsvRow;
 import net.happykoo.ecb.batch.service.file.SplitFilePartitioner;
 import net.happykoo.ecb.batch.util.FileUtils;
 import net.happykoo.ecb.batch.util.ReflectionUtils;

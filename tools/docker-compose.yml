@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:latest
     container_name: ecb-postgres
+    shm_size: 1g
     volumes:
       - postgres_data:/var/lib/postgresql/18/docker
       - ./postgres/postgresql.conf:/var/lib/postgresql/18/docker/postgresql.conf

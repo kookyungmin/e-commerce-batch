@@ -18,7 +18,8 @@
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
       <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
         <timestampFormat>yyyy-MM-dd' 'HH:mm:ss.SSS</timestampFormat>
-        <appendLineSeperator>true</appendLineSeperator>
+        <appendLineSeparator>true</appendLineSeparator>
+        <lineSeparator>\n</lineSeparator>
         <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
           <prettyPrint>false</prettyPrint>
         </jsonFormatter>

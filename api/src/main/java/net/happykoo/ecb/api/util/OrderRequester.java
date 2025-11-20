@@ -32,7 +32,7 @@ public class OrderRequester {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Random random = new Random();
-  private static final ExecutorService executor = Executors.newFixedThreadPool(200);
+  private static final ExecutorService executor = Executors.newFixedThreadPool(300);
 
   private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
       .executor(executor)
@@ -46,10 +46,10 @@ public class OrderRequester {
 
     try {
       int page = 0;
-      int size = 10000;
+      int size = 2000;
       boolean hasNextPage = true;
 
-      while (hasNextPage && page < 1000) {
+      while (hasNextPage && page < 5000) {
         String productJson = fetchProduct(page, size);
         JsonNode productsNode = OBJECT_MAPPER.readTree(productJson);
         JsonNode contentNode = productsNode.get("content");

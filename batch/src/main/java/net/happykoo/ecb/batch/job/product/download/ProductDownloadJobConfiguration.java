@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 import net.happykoo.ecb.batch.domain.file.PartitionedFileRepository;
 import net.happykoo.ecb.batch.domain.product.Product;
 import net.happykoo.ecb.batch.domain.product.ProductStatus;
-import net.happykoo.ecb.batch.dto.ProductDownloadCsvRow;
+import net.happykoo.ecb.batch.dto.product.ProductDownloadCsvRow;
 import net.happykoo.ecb.batch.service.product.ProductDownloadPartitioner;
 import net.happykoo.ecb.batch.util.FileUtils;
 import net.happykoo.ecb.batch.util.ReflectionUtils;

@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.happykoo.ecb.batch.dto.ProductUploadCsvRow;
+import net.happykoo.ecb.batch.dto.product.ProductUploadCsvRow;
 import net.happykoo.ecb.batch.util.DateTimeUtils;
 import net.happykoo.ecb.batch.util.RandomUtils;
 

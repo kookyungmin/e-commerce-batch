@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
 import net.happykoo.ecb.batch.domain.product.ProductStatus;
-import net.happykoo.ecb.batch.dto.ProductUploadCsvRow;
+import net.happykoo.ecb.batch.dto.product.ProductUploadCsvRow;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 

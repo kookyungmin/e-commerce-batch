@@ -6,7 +6,7 @@ spring:
     username: postgres
     password:
     hikari:
-      maximum-pool-size: 32
+      maximum-pool-size: 300
   jpa:
     #    show-sql: true
     hibernate:
