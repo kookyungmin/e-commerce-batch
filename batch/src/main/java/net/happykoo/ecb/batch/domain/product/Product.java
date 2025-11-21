@@ -1,5 +1,10 @@
 package net.happykoo.ecb.batch.domain.product;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -10,11 +15,14 @@ import net.happykoo.ecb.batch.dto.product.ProductUploadCsvRow;
 import net.happykoo.ecb.batch.util.DateTimeUtils;
 import net.happykoo.ecb.batch.util.RandomUtils;
 
+@Entity
+@Table(name = "products")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class Product {
 
+  @Id
   private String productId;
   private Long sellerId;
 
@@ -22,6 +30,7 @@ public class Product {
   private String productName;
   private LocalDate salesStartDate; //판매 시작일
   private LocalDate salesEndDate; //판매 종료일
+  @Enumerated(value = EnumType.STRING)
   private ProductStatus productStatus;
   private String brand; //브랜드
   private String manufacturer; //제조사

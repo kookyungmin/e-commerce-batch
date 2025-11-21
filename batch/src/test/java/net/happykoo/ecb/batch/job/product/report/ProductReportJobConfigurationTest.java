@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import net.happykoo.ecb.batch.domain.product.Product;
 import net.happykoo.ecb.batch.domain.product.ProductStatus;
 import net.happykoo.ecb.batch.jobconfig.BaseBatchIntegrationTest;
+import net.happykoo.ecb.batch.service.product.ProductReportService;
 import net.happykoo.ecb.batch.service.product.ProductService;
 import net.happykoo.ecb.batch.util.DateTimeUtils;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,9 @@ class ProductReportJobConfigurationTest extends BaseBatchIntegrationTest {
   @Autowired
   private ProductService productService;
 
+  @Autowired
+  private ProductReportService productReportService;
+
   @Test
   void testJob(@Autowired Job productReportJob) throws Exception {
     LocalDate now = LocalDate.now();
@@ -32,18 +36,10 @@ class ProductReportJobConfigurationTest extends BaseBatchIntegrationTest {
 
     assertAll(
         () -> assertJobCompleted(jobExecution),
-        () -> assertThat(jdbcTemplate.queryForObject(
-            "select count(*) from category_reports where stat_date ='" + now + "'"
-            , Long.class)).isEqualTo(4),
-        () -> assertThat(jdbcTemplate.queryForObject(
-            "select count(*) from brand_reports where stat_date ='" + now + "'"
-            , Long.class)).isEqualTo(4),
-        () -> assertThat(jdbcTemplate.queryForObject(
-            "select count(*) from manufacturer_reports where stat_date ='" + now + "'"
-            , Long.class)).isEqualTo(4),
-        () -> assertThat(jdbcTemplate.queryForObject(
-            "select count(*) from product_status_reports where stat_date ='" + now + "'"
-            , Long.class)).isEqualTo(2)
+        () -> assertThat(productReportService.categoryReportCountByDate(now)).isEqualTo(4),
+        () -> assertThat(productReportService.brandReportCountByDate(now)).isEqualTo(4),
+        () -> assertThat(productReportService.manufacturerReportCountByDate(now)).isEqualTo(4),
+        () -> assertThat(productReportService.productStatusReportCountByDate(now)).isEqualTo(2)
     );
   }
 

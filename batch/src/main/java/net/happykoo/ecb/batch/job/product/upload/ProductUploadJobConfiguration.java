@@ -1,8 +1,7 @@
 package net.happykoo.ecb.batch.job.product.upload;
 
+import jakarta.persistence.EntityManagerFactory;
 import java.io.File;
-import java.sql.Timestamp;
-import javax.sql.DataSource;
 import net.happykoo.ecb.batch.domain.product.Product;
 import net.happykoo.ecb.batch.dto.product.ProductUploadCsvRow;
 import net.happykoo.ecb.batch.service.file.SplitFilePartitioner;
@@ -22,8 +21,8 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
@@ -127,35 +126,10 @@ public class ProductUploadJobConfiguration {
   }
 
   @Bean
-  public JdbcBatchItemWriter<Product> productWriter(DataSource dataSource) {
-    String sql = """
-        INSERT INTO products(product_id, seller_id, category, product_name, 
-            sales_start_date, sales_end_date, product_status, brand, manufacturer, 
-            sales_price, stock_quantity, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
-//    VALUES (:productId, :sellerId, :category, :productName,
-//                :salesStartDate, :salesEndDate, :productStatus, :brand, :manufacturer,
-//                :salesPrice, :stockQuantity, :createdAt, :updatedAt)
-    return new JdbcBatchItemWriterBuilder<Product>()
-        .dataSource(dataSource)
-        .sql(sql)
-//        .beanMapped()
-        .itemPreparedStatementSetter((product, ps) -> {
-          ps.setString(1, product.getProductId());
-          ps.setLong(2, product.getSellerId());
-          ps.setString(3, product.getCategory());
-          ps.setString(4, product.getProductName());
-          ps.setObject(5, product.getSalesStartDate());
-          ps.setObject(6, product.getSalesEndDate());
-          ps.setString(7, product.getProductStatus().name());
-          ps.setString(8, product.getBrand());
-          ps.setString(9, product.getManufacturer());
-          ps.setInt(10, product.getSalesPrice());
-          ps.setInt(11, product.getStockQuantity());
-          ps.setTimestamp(12, Timestamp.valueOf(product.getCreatedAt()));
-          ps.setTimestamp(13, Timestamp.valueOf(product.getUpdatedAt()));
-        })
+  public JpaItemWriter<Product> productWriter(EntityManagerFactory entityManagerFactory) {
+    return new JpaItemWriterBuilder<Product>()
+        .entityManagerFactory(entityManagerFactory)
+        .usePersist(true)
         .build();
   }
 }

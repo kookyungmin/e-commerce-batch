@@ -22,9 +22,9 @@ public class ProductReportJobConfiguration {
       TaskExecutor taskExecutor) {
     return new JobBuilder("productReportJob", jobRepository)
         .listener(jobExecutionListener)
-        .start(categoryReportFlow)
+        .start(brandReportFlow)
         .split(taskExecutor)
-        .add(brandReportFlow, manufacturerReportFlow, productStatusReportFlow)
+        .add(categoryReportFlow, manufacturerReportFlow, productStatusReportFlow)
         .end()
         .build();
   }

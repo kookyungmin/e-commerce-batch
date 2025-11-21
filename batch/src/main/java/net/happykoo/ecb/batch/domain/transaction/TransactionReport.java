@@ -1,5 +1,8 @@
 package net.happykoo.ecb.batch.domain.transaction;
 
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,14 +16,15 @@ import lombok.NoArgsConstructor;
 import net.happykoo.ecb.batch.dto.transaction.TransactionLog;
 import net.happykoo.ecb.batch.util.DateTimeUtils;
 
+@Entity
+@Table(name = "transaction_reports")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TransactionReport {
 
-  private LocalDate transactionDate;
-
-  private String transactionType;
+  @EmbeddedId
+  private TransactionReportId id;
 
   private Long transactionCount;
 
@@ -53,15 +57,16 @@ public class TransactionReport {
       Long paymentMethodCount, BigDecimal avgProductCount, Long totalItemQuantity,
       Set<String> customerSet, Set<String> orderSet, Set<String> paymentMethodSet,
       Long sumProductCount) {
-    return new TransactionReport(transactionDate, transactionType, transactionCount, totalAmount,
+    return new TransactionReport(new TransactionReportId(transactionDate, transactionType),
+        transactionCount, totalAmount,
         customerCount, orderCount, paymentMethodCount, avgProductCount, totalItemQuantity,
         customerSet, orderSet, paymentMethodSet, sumProductCount);
   }
 
   public static TransactionReport from(TransactionLog log) {
     return new TransactionReport(
-        DateTimeUtils.toLocalDateTime(log.timestamp()).toLocalDate(),
-        log.getTransactionType(),
+        new TransactionReportId(DateTimeUtils.toLocalDateTime(log.timestamp()).toLocalDate(),
+            log.getTransactionType()),
         1L,
         log.getTotalAmount(),
         1L,
@@ -89,5 +94,13 @@ public class TransactionReport {
     paymentMethodCount = (long) paymentMethodSet.size();
     avgProductCount = new BigDecimal((double) sumProductCount / transactionCount);
     totalItemQuantity += report.getTotalItemQuantity();
+  }
+
+  public LocalDate getTransactionDate() {
+    return id.getTransactionDate();
+  }
+
+  public String getTransactionType() {
+    return id.getTransactionType();
   }
 }

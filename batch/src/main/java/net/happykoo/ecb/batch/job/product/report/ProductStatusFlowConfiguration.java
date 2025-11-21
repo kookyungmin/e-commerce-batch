@@ -1,6 +1,6 @@
 package net.happykoo.ecb.batch.job.product.report;
 
-import javax.sql.DataSource;
+import jakarta.persistence.EntityManagerFactory;
 import net.happykoo.ecb.batch.domain.product.report.ProductStatusReport;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
@@ -11,10 +11,10 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
-import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.database.JpaCursorItemReader;
+import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -45,33 +45,28 @@ public class ProductStatusFlowConfiguration {
   }
 
   @Bean
-  public JdbcCursorItemReader<ProductStatusReport> productStatusReportReader(
-      DataSource dataSource) {
-    var sql = """
-        select product_status, 
-          count(*) product_count,
-          avg(stock_quantity) avg_stock_quantity
-        from products
-        group by product_status
+  public JpaCursorItemReader<ProductStatusReport> productStatusReportReader(
+      EntityManagerFactory entityManagerFactory) {
+    var query = """
+        select new ProductStatusReport(p.productStatus, 
+          count(p),
+          avg(p.stockQuantity))
+        from Product p
+        group by p.productStatus
         """;
-    return new JdbcCursorItemReaderBuilder<ProductStatusReport>()
-        .dataSource(dataSource)
+    return new JpaCursorItemReaderBuilder<ProductStatusReport>()
         .name("productStatusReportReader")
-        .sql(sql)
-        .beanRowMapper(ProductStatusReport.class)
+        .entityManagerFactory(entityManagerFactory)
+        .queryString(query)
         .build();
   }
 
   @Bean
-  public JdbcBatchItemWriter<ProductStatusReport> productStatusReportWriter(DataSource dataSource) {
-    var sql = """
-        insert into product_status_reports(stat_date, product_status, product_count, avg_stock_quantity)
-        values (:statDate, :productStatus, :productCount, :avgStockQuantity)
-        """;
-    return new JdbcBatchItemWriterBuilder<ProductStatusReport>()
-        .dataSource(dataSource)
-        .sql(sql)
-        .beanMapped()
+  public JpaItemWriter<ProductStatusReport> productStatusReportWriter(
+      EntityManagerFactory entityManagerFactory) {
+    return new JpaItemWriterBuilder<ProductStatusReport>()
+        .entityManagerFactory(entityManagerFactory)
+        .usePersist(true)
         .build();
   }
 

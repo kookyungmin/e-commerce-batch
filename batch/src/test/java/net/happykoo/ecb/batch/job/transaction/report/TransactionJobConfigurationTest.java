@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
 import net.happykoo.ecb.batch.jobconfig.BaseBatchIntegrationTest;
+import net.happykoo.ecb.batch.service.transaction.TransactionReportService;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -22,6 +23,9 @@ class TransactionJobConfigurationTest extends BaseBatchIntegrationTest {
   @Value("classpath:/logs/transaction.log")
   private Resource resource;
 
+  @Autowired
+  private TransactionReportService transactionReportService;
+
   @Test
   void transactionReportJobTest(@Autowired Job transactionReportJob) throws Exception {
     jobLauncherTestUtils.setJob(transactionReportJob);
@@ -30,8 +34,7 @@ class TransactionJobConfigurationTest extends BaseBatchIntegrationTest {
     JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
     assertAll(() -> assertJobCompleted(jobExecution),
-        () -> assertThat(jdbcTemplate.queryForObject("select count(*) from transaction_reports",
-            Integer.class)).isEqualTo(4));
+        () -> assertThat(transactionReportService.countTransactionReports()).isEqualTo(4));
   }
 
   private JobParameters getJobParameters() throws IOException {

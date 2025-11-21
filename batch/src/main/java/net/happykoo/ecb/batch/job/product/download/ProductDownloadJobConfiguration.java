@@ -1,12 +1,11 @@
 package net.happykoo.ecb.batch.job.product.download;
 
+import jakarta.persistence.EntityManagerFactory;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
 import net.happykoo.ecb.batch.domain.file.PartitionedFileRepository;
 import net.happykoo.ecb.batch.domain.product.Product;
-import net.happykoo.ecb.batch.domain.product.ProductStatus;
 import net.happykoo.ecb.batch.dto.product.ProductDownloadCsvRow;
 import net.happykoo.ecb.batch.service.product.ProductDownloadPartitioner;
 import net.happykoo.ecb.batch.util.FileUtils;
@@ -26,10 +25,8 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JdbcPagingItemReader;
-import org.springframework.batch.item.database.PagingQueryProvider;
-import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
-import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.batch.item.support.SynchronizedItemStreamWriter;
@@ -105,47 +102,19 @@ public class ProductDownloadJobConfiguration {
 
   @Bean
   @StepScope
-  public JdbcPagingItemReader<Product> productPagingReader(DataSource dataSource,
-      PagingQueryProvider pagingQueryProvider,
+  public JpaPagingItemReader<Product> productPagingReader(EntityManagerFactory entityManagerFactory,
       @Value("#{stepExecutionContext['minId']}") String minId,
       @Value("#{stepExecutionContext['maxId']}") String maxId) {
-    return new JdbcPagingItemReaderBuilder<Product>()
-        .dataSource(dataSource)
+    var query = """
+        select p from Product p where p.productId between :minId and :maxId order by p.productId
+        """;
+    return new JpaPagingItemReaderBuilder<Product>()
+        .entityManagerFactory(entityManagerFactory)
         .name("productPagingReader")
-        .queryProvider(pagingQueryProvider)
-        .pageSize(1000)
-        .rowMapper((rs, rowNum) -> Product.of(
-            rs.getString("product_id"),
-            rs.getLong("seller_id"),
-            rs.getString("category"),
-            rs.getString("product_name"),
-            rs.getDate("sales_start_date").toLocalDate(),
-            rs.getDate("sales_end_date").toLocalDate(),
-            ProductStatus.valueOf(rs.getString("product_status")),
-            rs.getString("brand"),
-            rs.getString("manufacturer"),
-            rs.getInt("sales_price"),
-            rs.getInt("stock_quantity"),
-            rs.getTimestamp("created_at").toLocalDateTime(),
-            rs.getTimestamp("updated_at").toLocalDateTime()
-        ))
+        .queryString(query)
         .parameterValues(Map.of("minId", minId, "maxId", maxId))
+        .pageSize(1000)
         .build();
-  }
-
-  @Bean
-  public SqlPagingQueryProviderFactoryBean productPagingQueryProvider(DataSource dataSource) {
-    SqlPagingQueryProviderFactoryBean providerFactoryBean = new SqlPagingQueryProviderFactoryBean();
-
-    providerFactoryBean.setDataSource(dataSource);
-    providerFactoryBean.setSelectClause(
-        "select product_id,seller_id,category,product_name,sales_start_date,sales_end_date,product_status,brand,manufacturer,sales_price,stock_quantity,created_at,updated_at"
-    );
-    providerFactoryBean.setFromClause("from products");
-    providerFactoryBean.setWhereClause("product_id >= :minId and product_id <= :maxId");
-    providerFactoryBean.setSortKey("product_id");
-
-    return providerFactoryBean;
   }
 
   @Bean

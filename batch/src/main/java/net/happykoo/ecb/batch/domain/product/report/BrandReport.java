@@ -1,27 +1,41 @@
 package net.happykoo.ecb.batch.domain.product.report;
 
-import java.math.BigDecimal;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+@Entity
+@Table(name = "brand_reports")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-@Setter
 public class BrandReport {
 
-  private LocalDate statDate = LocalDate.now();
-  private String brand;
-  private Long productCount;
-  private BigDecimal avgSalesPrice;
-  private BigDecimal maxSalesPrice;
-  private BigDecimal minSalesPrice;
-  private Long totalStockQuantity;
-  private BigDecimal avgStockQuantity;
-  private BigDecimal totalStockValue; //재고 가치
+  @EmbeddedId
+  private BrandReportId id;
 
+  private Long productCount;
+  private Double avgSalesPrice;
+  private Integer maxSalesPrice;
+  private Integer minSalesPrice;
+  private Long totalStockQuantity;
+  private Double avgStockQuantity;
+  private Double totalStockValue; //재고 가치
+
+  public BrandReport(String brand,
+      Long productCount,
+      Double avgSalesPrice,
+      Integer maxSalesPrice,
+      Integer minSalesPrice,
+      Long totalStockQuantity,
+      Double avgStockQuantity,
+      Double totalStockValue) {
+    this(new BrandReportId(LocalDate.now(), brand), productCount, avgSalesPrice, maxSalesPrice,
+        minSalesPrice, totalStockQuantity, avgStockQuantity, totalStockValue);
+  }
 }

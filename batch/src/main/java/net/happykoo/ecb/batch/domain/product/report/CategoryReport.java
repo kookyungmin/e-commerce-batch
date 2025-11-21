@@ -1,26 +1,41 @@
 package net.happykoo.ecb.batch.domain.product.report;
 
-import java.math.BigDecimal;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+@Entity
+@Table(name = "category_reports")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-@Setter
 public class CategoryReport {
 
-  private LocalDate statDate = LocalDate.now();
-  private String category;
+  @EmbeddedId
+  private CategoryReportId id;
+
   private Long productCount;
-  private BigDecimal avgSalesPrice;
-  private BigDecimal maxSalesPrice;
-  private BigDecimal minSalesPrice;
+  private Double avgSalesPrice;
+  private Integer maxSalesPrice;
+  private Integer minSalesPrice;
   private Long totalStockQuantity;
-  private BigDecimal potentialSalesAmount;
+  private Double potentialSalesAmount;
+
+  public CategoryReport(String category, Long productCount, Double avgSalesPrice,
+      Integer maxSalesPrice, Integer minSalesPrice, Long totalStockQuantity,
+      Double potentialSalesAmount) {
+    this.id = new CategoryReportId(LocalDate.now(), category);
+    this.productCount = productCount;
+    this.avgSalesPrice = avgSalesPrice;
+    this.maxSalesPrice = maxSalesPrice;
+    this.minSalesPrice = minSalesPrice;
+    this.totalStockQuantity = totalStockQuantity;
+    this.potentialSalesAmount = potentialSalesAmount;
+  }
 
 }

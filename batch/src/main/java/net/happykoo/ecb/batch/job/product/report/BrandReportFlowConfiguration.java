@@ -1,6 +1,6 @@
 package net.happykoo.ecb.batch.job.product.report;
 
-import javax.sql.DataSource;
+import jakarta.persistence.EntityManagerFactory;
 import net.happykoo.ecb.batch.domain.product.report.BrandReport;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
@@ -11,10 +11,10 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
-import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.database.JpaCursorItemReader;
+import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -45,37 +45,32 @@ public class BrandReportFlowConfiguration {
   }
 
   @Bean
-  public JdbcCursorItemReader<BrandReport> brandReportReader(DataSource dataSource) {
-    var sql = """
-        select brand, 
-          count(*) product_count,
-          avg(sales_price) avg_sales_price, 
-          min(sales_price) min_sales_price, 
-          max(sales_price) max_sales_price, 
-          sum(stock_quantity) total_stock_quantity,
-          avg(stock_quantity) avg_stock_quantity,
-          sum((sales_price * 1.0) * stock_quantity) total_stock_value
-        from products
-        group by brand
+  public JpaCursorItemReader<BrandReport> brandReportReader(
+      EntityManagerFactory entityManagerFactory) {
+    var query = """
+        select new BrandReport(p.brand, 
+          count(p),
+          avg(p.salesPrice), 
+          max(p.salesPrice), 
+          min(p.salesPrice), 
+          sum(p.stockQuantity),
+          avg(p.stockQuantity),
+          sum(p.salesPrice * 1.0 * p.stockQuantity))
+        from Product p
+        group by p.brand
         """;
-    return new JdbcCursorItemReaderBuilder<BrandReport>()
-        .dataSource(dataSource)
+    return new JpaCursorItemReaderBuilder<BrandReport>()
+        .entityManagerFactory(entityManagerFactory)
         .name("brandReportReader")
-        .sql(sql)
-        .beanRowMapper(BrandReport.class)
+        .queryString(query)
         .build();
   }
 
   @Bean
-  public JdbcBatchItemWriter<BrandReport> brandReportWriter(DataSource dataSource) {
-    var sql = """
-        insert into brand_reports(stat_date, brand, product_count, avg_sales_price, min_sales_price, max_sales_price, total_stock_quantity, avg_stock_quantity, total_stock_value)
-        values (:statDate, :brand, :productCount, :avgSalesPrice, :minSalesPrice, :maxSalesPrice, :totalStockQuantity, :avgStockQuantity, :totalStockValue)
-        """;
-    return new JdbcBatchItemWriterBuilder<BrandReport>()
-        .dataSource(dataSource)
-        .sql(sql)
-        .beanMapped()
+  public JpaItemWriter<BrandReport> brandReportWriter(EntityManagerFactory entityManagerFactory) {
+    return new JpaItemWriterBuilder<BrandReport>()
+        .entityManagerFactory(entityManagerFactory)
+        .usePersist(true)
         .build();
   }
 }
