@@ -1,4 +1,4 @@
-package net.happykoo.ecb.api.controller.dto;
+package net.happykoo.ecb.api.controller.product.dto;
 
 import java.time.LocalDate;
 import net.happykoo.ecb.api.domain.product.ProductStatus;

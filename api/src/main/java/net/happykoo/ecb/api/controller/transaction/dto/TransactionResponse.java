@@ -1,4 +1,4 @@
-package net.happykoo.ecb.api.controller.dto;
+package net.happykoo.ecb.api.controller.transaction.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

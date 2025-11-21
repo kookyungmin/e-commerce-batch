@@ -1,9 +1,9 @@
-package net.happykoo.ecb.api.controller;
+package net.happykoo.ecb.api.controller.order;
 
 import lombok.RequiredArgsConstructor;
-import net.happykoo.ecb.api.controller.dto.OrderRequest;
-import net.happykoo.ecb.api.controller.dto.OrderResponse;
-import net.happykoo.ecb.api.controller.dto.PaymentRequest;
+import net.happykoo.ecb.api.controller.order.dto.OrderRequest;
+import net.happykoo.ecb.api.controller.order.dto.OrderResponse;
+import net.happykoo.ecb.api.controller.order.dto.PaymentRequest;
 import net.happykoo.ecb.api.service.order.OrderService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,8 +1,9 @@
-package net.happykoo.ecb.api.controller.dto;
+package net.happykoo.ecb.api.controller.order.dto;
 
 import net.happykoo.ecb.api.service.order.dto.OrderItemCommand;
 
 public record OrderItemRequest(String productId, int quantity) {
+
   public static OrderItemRequest of(String productId, int quantity) {
     return new OrderItemRequest(productId, quantity);
   }

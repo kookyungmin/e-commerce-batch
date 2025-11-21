@@ -1,4 +1,4 @@
-package net.happykoo.ecb.api.controller.dto;
+package net.happykoo.ecb.api.controller.transaction.dto;
 
 import java.util.List;
 import net.happykoo.ecb.api.service.transaction.dto.TransactionResults;

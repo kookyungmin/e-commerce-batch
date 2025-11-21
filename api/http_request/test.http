@@ -46,3 +46,6 @@ POST http://localhost:8080/api/v1/orders/4/cancel
 
 ### 거래 데이터 보고서 조회
 GET http://localhost:8080/api/v1/transaction/reports?dt=2025-11-20
+
+### 상품 현황 보고서 조회
+GET http://localhost:8080/api/v1/product/reports?dt=2025-11-21

@@ -1,4 +1,4 @@
-package net.happykoo.ecb.api.controller.dto;
+package net.happykoo.ecb.api.controller.order.dto;
 
 import java.util.List;
 import net.happykoo.ecb.api.domain.payment.PaymentMethod;
