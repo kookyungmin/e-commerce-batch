@@ -24,5 +24,7 @@ build/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-
+data/
 logs/
+!**/src/test/**/data
+!**/src/test/**/logs

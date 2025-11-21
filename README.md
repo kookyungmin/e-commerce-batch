@@ -42,6 +42,8 @@ Spring Batch를 활용한 이커머스 대용량 처리 시스템
 
 `--spring.batch.job.name=transactionReportJob inputFilePath=logs/transaction.log,java.lang.String,false gridSize=4,java.lang.Integer,false`
 
+`--spring.batch.job.name=productReportJob`
+
 ## docker 실행 상태에서 DB 접근
 
 ### Postgresql
